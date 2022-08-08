@@ -32,6 +32,22 @@ function add(a: Combinable, b: Combinable) {
     return a + b;
 }
 
+const fetchUserData = {
+    id: 'u1',
+    name: 'Gabi',
+    job: {title: 'CEO', description: 'My own company :D'}
+};
+
+console.log(fetchUserData?.job?.title);
+
+const userInput = '';
+
+const storedData = userInput ?? 'DEFAULT';
+const storedData2 = userInput || 'DEFAULT';
+
+console.log(storedData);
+console.log(storedData2);
+
 const result = add('Gstfnk', ' Github');
 result.split(' ');
 
