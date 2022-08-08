@@ -1,139 +1,95 @@
-type Admin = {
-    name: string;
-    privileges: string[];
-};
+const names: Array<string> = ['Gabi', 'Tom', 'Max'];
 
-type Employee = {
-    name: string;
-    startDate: Date;
-};
+const promise: Promise<number> = new Promise((resolve, reject) => {
+    setTimeout(() => {
+        resolve(10);
+    }, 2000);
+});
 
-// interface ElevatedEmployee extends Employee, Admin {}
+promise.then(data => {
+    // data.split(' ');
+});
 
-type ElevatedEmployee = Admin & Employee;
-
-const e1: ElevatedEmployee = {
-    name: 'Max',
-    privileges: ['create-server'],
-    startDate: new Date()
-};
-
-type Combinable = string | number;
-type Numeric = number | boolean;
-
-type Universal = Combinable & Numeric;
-
-function add(a: number, b: number): number;
-function add(a: string, b: string): string;
-function add(a: Combinable, b: Combinable) {
-    if (typeof a === 'string' || typeof b === 'string') {
-        return a.toString() + b.toString();
-    }
-    return a + b;
+function merge<T extends object, U extends object>(objA: T, objB: U) {
+    return Object.assign(objA, objB);
 }
 
-const fetchUserData = {
-    id: 'u1',
-    name: 'Gabi',
-    job: {title: 'CEO', description: 'My own company :D'}
-};
+const mergedObj = merge({name: 'Gabi', hobbies: ['Playing Dota2']}, {age: 22});
 
-console.log(fetchUserData?.job?.title);
+console.log(mergedObj.hobbies.toString());
 
-const userInput = '';
+interface Lengthy {
+    length: number;
+}
 
-const storedData = userInput ?? 'DEFAULT';
-const storedData2 = userInput || 'DEFAULT';
+function countAndDescribe<T extends Lengthy>(element: T) {
+    let descriptionText = 'Got no value.';
+    if (element.length === 1) descriptionText = 'Got 1 element';
+    else if (element.length > 1) descriptionText = 'Got ' + element.length + ' elements.';
+    return [element, descriptionText];
+}
 
-console.log(storedData);
-console.log(storedData2);
+console.log(countAndDescribe('Hi there!')[1]);
+console.log(countAndDescribe(['Playing Dota2', 'Drawing'])[1]);
 
-const result = add('Gstfnk', ' Github');
-result.split(' ');
+function extractAndConvert<T extends object, U extends keyof T>(obj: T, key: U) {
+    return 'Value: ' + obj[key];
+}
 
-type UnknownEmployee = Employee | Admin;
+console.log(extractAndConvert({github: 'gstfnk', name: 'Gabi', age: 22}, 'name'));
 
-function printEmployeeInformation(emp: UnknownEmployee) {
-    console.log('Name: ' + emp.name);
-    if ('privileges' in emp) {
-        console.log('Privileges: ' + emp.privileges);
+class DataStorage<T> {
+    private data: T[] = [];
+
+    addItem(item: T) {
+        this.data.push(item);
     }
-    if ('startDate' in emp) {
-        console.log('Start Date: ' + emp.startDate);
+
+    removeItem(item: T) {
+        this.data.splice(this.data.indexOf(item), 1);
+    }
+
+    getItems() {
+        return [...this.data];
     }
 }
 
-printEmployeeInformation({name: 'Manu', startDate: new Date()});
+const textStorage = new DataStorage<string>();
+textStorage.addItem('Im');
+textStorage.addItem('adding');
+textStorage.addItem('items');
+console.log(textStorage.getItems());
+textStorage.removeItem('items');
+console.log(textStorage.getItems());
 
-class Car {
-    drive() {
-        console.log('Driving...');
-    }
+const numberStorage = new DataStorage<number>();
+
+const objectStorage = new DataStorage<object>();
+
+objectStorage.addItem({name: 'Gabi'});
+objectStorage.addItem({name: 'unknown'});
+
+console.log(objectStorage.getItems());
+
+// this method won't delete this because of references
+objectStorage.removeItem({name: 'Gabi'});
+
+console.log(objectStorage.getItems());
+
+interface CourseGoal {
+    title: string;
+    description: string;
+    completeUntil: Date;
 }
 
-class Truck {
-    drive() {
-        console.log('Driving a truck...');
-    }
-
-    loadCargo(amount: number) {
-        console.log('Loading cargo ...' + amount);
-    }
+function createCourseGoal(title: string, description: string, date: Date): CourseGoal {
+    let courseGoal: Partial<CourseGoal> = {};
+    courseGoal.title = title;
+    courseGoal.description = description;
+    courseGoal.completeUntil = date;
+    return courseGoal as CourseGoal;
 }
 
-type Vehicle = Car | Truck;
-
-const v1 = new Car();
-const v2 = new Truck();
-
-function useVehicle(vehicle: Vehicle) {
-    vehicle.drive();
-    if (vehicle instanceof Truck) {
-        vehicle.loadCargo(1000);
-    }
-}
-
-useVehicle(v1);
-useVehicle(v2);
-
-interface Bird {
-    type: 'bird';
-    flyingSpeed: number;
-}
-
-interface Horse {
-    type: 'horse';
-    runningSpeed: number;
-}
-
-type Animal = Bird | Horse;
-
-function moveAnimal(animal: Animal) {
-    let speed;
-    switch (animal.type) {
-        case 'bird':
-            speed = animal.flyingSpeed;
-            break;
-        case 'horse':
-            speed = animal.runningSpeed;
-    }
-    console.log('Moving at speed: ' + speed);
-}
-
-moveAnimal({type: 'bird', flyingSpeed: 10});
-
-// const userInputElement = <HTMLInputElement>document.getElementById('user-input')!;
-const userInputElement = document.getElementById('user-input');
-
-if (userInputElement) {
-    (userInputElement as HTMLInputElement).value = 'Hi there!';
-}
-
-interface ErrorContainer { // { email: 'Not a valid email', username: 'Must start with a character' }
-    [prop: string]: string;
-}
-
-const errorBag: ErrorContainer = {
-    email: 'Not a valid email',
-    username: 'Must start with a character!'
-}
+const names2: Readonly<string[]> = ['Gabi', 'Tom', 'Max'];
+// names2.push('John');
+// names2.pop;
