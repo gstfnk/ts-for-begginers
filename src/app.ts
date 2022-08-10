@@ -1,3 +1,45 @@
+// Autobind decorator
+function Autobind(target: any, methodName: string, descriptor: PropertyDescriptor) {
+    const originalMethod = descriptor.value;
+    const adjustedDescriptor: PropertyDescriptor = {
+        configurable: true,
+        enumerable: false,
+        get() {
+            return originalMethod.bind(this);
+        }
+    };
+    return adjustedDescriptor;
+}
+
+interface IValidatable {
+    value: string | number;
+    required?: boolean;
+    minLength?: number;
+    maxLength?: number;
+    min?: number;
+    max?: number;
+}
+
+function validate(validatableInput: IValidatable) {
+    let isValid = true;
+    if (validatableInput.required) {
+        isValid = isValid && (validatableInput.value.toString().trim().length !== 0);
+    }
+    if (validatableInput.minLength != null && typeof validatableInput.value === 'string') {
+        isValid = isValid && (validatableInput.value.length >= validatableInput.minLength)
+    }
+    if (validatableInput.maxLength != null && typeof validatableInput.value === 'string') {
+        isValid = isValid && (validatableInput.value.length <= validatableInput.maxLength)
+    }
+    if (validatableInput.min != null && typeof validatableInput.value === 'number') {
+        isValid = isValid && (validatableInput.value >= validatableInput.min)
+    }
+    if (validatableInput.max != null && typeof validatableInput.value === 'number') {
+        isValid = isValid && (validatableInput.value <= validatableInput.max)
+    }
+    return isValid;
+}
+
 class ProjectInput {
     templateElement: HTMLTemplateElement;
     hostElement: HTMLDivElement;
@@ -27,18 +69,60 @@ class ProjectInput {
         this.descriptionInputElement = this.element.querySelector('#description') as HTMLInputElement;
         this.peopleInputElement = this.element.querySelector('#people') as HTMLInputElement;
 
+        this.configure();
         this.attach();
     }
 
+    private gatherUserInput(): [string, string, number] | void {
+        const enteredTitle = this.titleInputElement.value;
+        const enteredDescription = this.descriptionInputElement.value;
+        const enteredPeople = this.peopleInputElement.value;
+
+        const titleValidatable: IValidatable = {
+            value: enteredTitle,
+            required: true
+        };
+
+        const descriptionValidatable: IValidatable = {
+            value: enteredDescription,
+            required: true,
+            minLength: 5
+        };
+
+        const peopleValidatable: IValidatable = {
+            value: enteredPeople,
+            required: true,
+            min: 1
+        };
+
+        if (!validate(titleValidatable) || !validate(descriptionValidatable) ||
+            !validate(peopleValidatable)) {
+            alert('Invalid input, please try again!');
+            return;
+        } else {
+            return [enteredTitle, enteredDescription, +enteredPeople];
+        }
+    }
+
+    private clearInputs() {
+        this.titleInputElement.value = '';
+        this.descriptionInputElement.value = '';
+        this.peopleInputElement.value = '';
+    }
+
+    @Autobind
     private submitHandler(event: Event) {
         event.preventDefault();
-        console.log(this.titleInputElement.value);
+        const userInput = this.gatherUserInput();
+        if (Array.isArray(userInput)) {
+            const [title, desc, input] = userInput;
+            console.log(title, desc, input);
+            this.clearInputs();
+        }
     }
 
     private configure() {
-        this.element.addEventListener('submit', event => {
-            this.submitHandler(event);
-        });
+        this.element.addEventListener('submit', this.submitHandler);
     }
 
     private attach() {
