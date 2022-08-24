@@ -40,7 +40,7 @@ const fetchUserData = {
 
 console.log(fetchUserData?.job?.title);
 
-const userInput = '';
+let userInput = '';
 
 const storedData = userInput ?? 'DEFAULT';
 const storedData2 = userInput || 'DEFAULT';
